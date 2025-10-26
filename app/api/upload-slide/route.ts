@@ -24,10 +24,15 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // 파일명을 짧고 간단하게 변경 (타임스탬프 기반)
+    const timestamp = Date.now();
+    const shortFilename = `slide-${timestamp}.html`;
+
     // Vercel Blob Storage에 업로드
-    const blob = await put(filename || file.name, file, {
+    const blob = await put(shortFilename, file, {
       access: 'public', // 공개 URL 생성
-      addRandomSuffix: true, // 고유한 파일명 보장
+      addRandomSuffix: false, // 타임스탬프로 이미 고유성 보장
+      contentType: 'text/html; charset=utf-8', // HTML로 브라우저에서 열리도록
     });
 
     return NextResponse.json({
