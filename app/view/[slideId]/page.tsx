@@ -11,17 +11,12 @@ export default function SlideViewerPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // slideId에서 Blob URL 직접 구성 (환경변수에서 store ID 추출 불필요)
-    const constructBlobUrl = () => {
+    // Proxy endpoint를 통해 슬라이드 접근 (inline 표시를 위한 올바른 헤더)
+    const constructProxyUrl = () => {
       try {
-        // Vercel Blob Storage의 public URL 패턴 사용
-        // 실제 store ID는 서버에서만 알 수 있으므로,
-        // 업로드 시 받은 blobUrl을 localStorage에 저장하거나
-        // 여기서는 공개 URL 패턴을 사용
-
-        // 간단한 방법: NEXT_PUBLIC으로 store ID를 공개
-        const storeId = process.env.NEXT_PUBLIC_BLOB_STORE_ID || 'LXLWj13VLXSG9AOD';
-        const url = `https://${storeId}.public.blob.vercel-storage.com/${slideId}.html`;
+        // 로컬 프록시 API를 사용하여 Blob Storage에서 가져오기
+        // 이렇게 하면 Content-Disposition: inline 헤더로 표시됨
+        const url = `/api/proxy-slide/${slideId}`;
 
         setBlobUrl(url);
         setIsLoading(false);
@@ -32,7 +27,7 @@ export default function SlideViewerPage() {
     };
 
     if (slideId) {
-      constructBlobUrl();
+      constructProxyUrl();
     }
   }, [slideId]);
 
