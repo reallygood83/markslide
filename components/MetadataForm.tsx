@@ -108,29 +108,107 @@ export function MetadataForm({
 
         {/* Page Count Slider */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <label htmlFor="pageCount" className="chanel-label">
-              슬라이드 페이지 수
-            </label>
-            <span className="text-sm font-semibold" style={{ fontFamily: 'Inter, sans-serif' }}>
-              {metadata.pageCount}페이지
-            </span>
+          <label htmlFor="pageCount" className="chanel-label">
+            슬라이드 페이지 수
+          </label>
+
+          {/* 현재 설정된 페이지 수 크게 표시 */}
+          <div style={{
+            padding: '1.5rem',
+            backgroundColor: '#000',
+            color: '#fff',
+            textAlign: 'center',
+            border: '3px solid #000',
+            fontFamily: 'Inter, sans-serif',
+          }}>
+            <div style={{ fontSize: '0.75rem', opacity: 0.7, marginBottom: '0.25rem' }}>
+              현재 설정
+            </div>
+            <div style={{ fontSize: '2.5rem', fontWeight: '700', letterSpacing: '-0.02em' }}>
+              {metadata.pageCount}
+            </div>
+            <div style={{ fontSize: '0.875rem', marginTop: '0.25rem' }}>
+              페이지
+            </div>
           </div>
-          <Slider
-            id="pageCount"
-            min={5}
-            max={50}
-            step={1}
-            value={[metadata.pageCount]}
-            onValueChange={([value]) => handleChange('pageCount', value)}
-            className="w-full"
-          />
-          <div className="flex justify-between text-xs" style={{ fontFamily: 'Inter, sans-serif', color: '#666' }}>
-            <span>5페이지</span>
-            <span style={{ color: '#000', fontWeight: '500' }}>
-              추천: {estimatedPages}페이지
-            </span>
-            <span>50페이지</span>
+
+          {/* 빠른 선택 버튼 */}
+          <div style={{
+            display: 'grid',
+            gridTemplateColumns: 'repeat(4, 1fr)',
+            gap: '0.5rem',
+            marginTop: '1rem'
+          }}>
+            <button
+              type="button"
+              onClick={() => handleChange('pageCount', 5)}
+              className={metadata.pageCount === 5 ? 'chanel-button-primary' : 'chanel-button-secondary'}
+              style={{
+                padding: '0.75rem 0.5rem',
+                fontSize: '0.875rem',
+                opacity: metadata.pageCount === 5 ? 1 : 0.7
+              }}
+            >
+              5장
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange('pageCount', 10)}
+              className={metadata.pageCount === 10 ? 'chanel-button-primary' : 'chanel-button-secondary'}
+              style={{
+                padding: '0.75rem 0.5rem',
+                fontSize: '0.875rem',
+                opacity: metadata.pageCount === 10 ? 1 : 0.7
+              }}
+            >
+              10장
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange('pageCount', estimatedPages)}
+              className={metadata.pageCount === estimatedPages ? 'chanel-button-primary' : 'chanel-button-secondary'}
+              style={{
+                padding: '0.75rem 0.5rem',
+                fontSize: '0.875rem',
+                opacity: metadata.pageCount === estimatedPages ? 1 : 0.7
+              }}
+            >
+              추천 {estimatedPages}장
+            </button>
+            <button
+              type="button"
+              onClick={() => handleChange('pageCount', 20)}
+              className={metadata.pageCount === 20 ? 'chanel-button-primary' : 'chanel-button-secondary'}
+              style={{
+                padding: '0.75rem 0.5rem',
+                fontSize: '0.875rem',
+                opacity: metadata.pageCount === 20 ? 1 : 0.7
+              }}
+            >
+              20장
+            </button>
+          </div>
+
+          {/* 슬라이더 */}
+          <div style={{ marginTop: '1.5rem' }}>
+            <Slider
+              id="pageCount"
+              min={5}
+              max={50}
+              step={1}
+              value={[metadata.pageCount]}
+              onValueChange={([value]) => handleChange('pageCount', value)}
+              className="w-full"
+            />
+            <div className="flex justify-between text-xs" style={{
+              fontFamily: 'Inter, sans-serif',
+              color: '#666',
+              marginTop: '0.5rem'
+            }}>
+              <span>최소 5</span>
+              <span>세밀 조정</span>
+              <span>최대 50</span>
+            </div>
           </div>
         </div>
 
