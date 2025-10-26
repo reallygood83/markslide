@@ -33,6 +33,7 @@ export default function SettingsPage() {
         },
         body: JSON.stringify({
           text: '안녕하세요! 이것은 API 테스트입니다.',
+          apiKey: apiKey  // 테스트할 API 키를 body에 포함
         }),
       });
 
@@ -86,7 +87,10 @@ export default function SettingsPage() {
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ text }),
+        body: JSON.stringify({
+          text,
+          apiKey: savedApiKey  // API 키를 body에 포함
+        }),
       });
 
       if (!response.ok) {
