@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>슬라이드로 이동 중...</title>
+    <script>
+        // URL에서 slideId 추출하여 Blob Storage로 리다이렉트
+        (function() {
+            const path = window.location.pathname;
+            const match = path.match(/\/view\/(.+)/);
+
+            if (match && match[1]) {
+                const slideId = match[1];
+                const blobUrl = `https://lxlwj13vlxsg9aod.public.blob.vercel-storage.com/${slideId}.html`;
+
+                // 즉시 리다이렉트
+                window.location.replace(blobUrl);
+            } else {
+                // slideId가 없으면 홈으로
+                window.location.replace('/');
+            }
+        })();
+    </script>
+</head>
+<body>
+    <p>슬라이드로 이동하는 중...</p>
+</body>
+</html>
