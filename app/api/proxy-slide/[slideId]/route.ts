@@ -7,9 +7,8 @@ export async function GET(
   try {
     const { slideId } = await params;
 
-    // Blob Storage URL 구성
-    const storeId = process.env.NEXT_PUBLIC_BLOB_STORE_ID || 'LXLWj13VLXSG9AOD';
-    const blobUrl = `https://${storeId}.public.blob.vercel-storage.com/${slideId}.html`;
+    // Blob Storage URL 구성 (소문자로 고정)
+    const blobUrl = `https://lxlwj13vlxsg9aod.public.blob.vercel-storage.com/${slideId}.html`;
 
     // Blob Storage에서 HTML 가져오기
     const response = await fetch(blobUrl);
