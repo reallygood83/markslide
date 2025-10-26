@@ -309,6 +309,81 @@ export function GenerateButton({
             </a>
           </div>
 
+          {/* 모바일 공유용 URL (카카오톡/문자) */}
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.75rem',
+            backgroundColor: '#eff6ff',
+            borderRadius: '8px',
+            border: '1px solid #3b82f6',
+          }}>
+            <div style={{
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#1e40af',
+              marginBottom: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}>
+              📱 모바일 공유용 URL
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: '#fff',
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid #3b82f6',
+            }}>
+              <code style={{
+                flex: 1,
+                fontSize: '0.75rem',
+                color: '#1e40af',
+                overflow: 'auto',
+                whiteSpace: 'nowrap',
+                fontWeight: '600',
+              }}>
+                {deployedUrl.replace('/view/', '/s/')}
+              </code>
+              <button
+                onClick={async () => {
+                  const mobileUrl = deployedUrl.replace('/view/', '/s/');
+                  await navigator.clipboard.writeText(mobileUrl);
+                  setIsCopied(true);
+                  setTimeout(() => setIsCopied(false), 2000);
+                }}
+                style={{
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: '#3b82f6',
+                  color: '#fff',
+                  border: 'none',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  transition: 'all 0.2s',
+                  fontWeight: '600',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#2563eb';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#3b82f6';
+                }}
+              >
+                <Copy className="w-3 h-3" />
+                복사
+              </button>
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#1e40af', marginTop: '0.5rem', fontWeight: '500' }}>
+              💡 카카오톡/문자로 공유하면 브라우저에서 바로 열립니다 (다운로드 없음!)
+            </div>
+          </div>
+
           {/* 노션 임베드 URL */}
           <div style={{
             marginTop: '0.75rem',
