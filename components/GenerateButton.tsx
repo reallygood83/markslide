@@ -27,6 +27,7 @@ export function GenerateButton({
   const [isComplete, setIsComplete] = useState(false);
   const [deployMode, setDeployMode] = useState<'download' | 'deploy'>('download');
   const [deployedUrl, setDeployedUrl] = useState<string | null>(null);
+  const [blobUrl, setBlobUrl] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
 
   const handleGenerate = async () => {
@@ -82,12 +83,13 @@ export function GenerateButton({
 
         const uploadData = await uploadResponse.json();
         setDeployedUrl(uploadData.url);
+        setBlobUrl(uploadData.blobUrl); // Blob Storage URL 저장
 
         // LocalStorage에 배포 기록 저장
         const deployHistory = JSON.parse(localStorage.getItem('deployedSlides') || '[]');
         deployHistory.unshift({
           title: metadata.title,
-          url: uploadData.url,
+          url: uploadData.blobUrl, // Blob URL로 변경
           timestamp: new Date().toISOString(),
           theme: theme.name,
         });
@@ -237,229 +239,106 @@ export function GenerateButton({
         </div>
       )}
 
-      {/* 배포 URL 표시 */}
-      {deployedUrl && (
+      {/* 배포 URL 표시 - 완전 단순화 버전 */}
+      {blobUrl && (
         <div style={{
-          padding: '1rem',
+          padding: '1.5rem',
           backgroundColor: '#f0fdf4',
           border: '2px solid #22c55e',
+          borderRadius: '8px',
           fontFamily: 'Inter, sans-serif',
         }}>
-          <div style={{ fontSize: '0.875rem', fontWeight: '600', marginBottom: '0.5rem', color: '#16a34a' }}>
-            🎉 슬라이드가 온라인에 배포되었습니다!
+          <div style={{
+            fontSize: '1rem',
+            fontWeight: '700',
+            marginBottom: '1rem',
+            color: '#16a34a',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem',
+          }}>
+            <CheckCircle2 className="w-5 h-5" />
+            슬라이드가 온라인에 배포되었습니다!
           </div>
+
+          {/* Blob Storage URL */}
           <div style={{
             display: 'flex',
             gap: '0.5rem',
             alignItems: 'center',
             backgroundColor: '#fff',
-            padding: '0.75rem',
-            border: '1px solid #d1d5db',
-            borderRadius: '4px',
+            padding: '1rem',
+            border: '2px solid #22c55e',
+            borderRadius: '6px',
+            marginBottom: '1rem',
           }}>
             <input
               type="text"
-              value={deployedUrl}
+              value={blobUrl}
               readOnly
               style={{
                 flex: 1,
-                fontSize: '0.75rem',
+                fontSize: '0.875rem',
                 border: 'none',
                 outline: 'none',
                 fontFamily: 'monospace',
                 color: '#1e40af',
+                fontWeight: '500',
               }}
             />
             <button
-              onClick={handleCopyUrl}
+              onClick={async () => {
+                await navigator.clipboard.writeText(blobUrl);
+                setIsCopied(true);
+                setTimeout(() => setIsCopied(false), 2000);
+              }}
               className="chanel-button-secondary"
               style={{
-                padding: '0.5rem 1rem',
-                fontSize: '0.75rem',
+                padding: '0.75rem 1.25rem',
+                fontSize: '0.875rem',
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.25rem',
+                gap: '0.5rem',
+                fontWeight: '600',
               }}
             >
-              <Copy className="w-3 h-3" />
+              <Copy className="w-4 h-4" />
               {isCopied ? '복사됨!' : '복사'}
             </button>
           </div>
 
           {/* 슬라이드 바로보기 버튼 */}
-          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
-            <a
-              href={deployedUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="chanel-button-primary"
-              style={{
-                flex: 1,
-                padding: '0.75rem 1.5rem',
-                fontSize: '0.875rem',
-                display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                gap: '0.5rem',
-                textDecoration: 'none',
-              }}
-            >
-              <ExternalLink className="w-4 h-4" />
-              슬라이드 바로보기
-            </a>
-          </div>
-
-          {/* 모바일 공유용 URL (카카오톡/문자) */}
-          <div style={{
-            marginTop: '0.75rem',
-            padding: '0.75rem',
-            backgroundColor: '#eff6ff',
-            borderRadius: '8px',
-            border: '1px solid #3b82f6',
-          }}>
-            <div style={{
-              fontSize: '0.75rem',
-              fontWeight: '600',
-              color: '#1e40af',
-              marginBottom: '0.5rem',
+          <a
+            href={blobUrl}
+            target="_blank"
+            rel="noopener noreferrer"
+            className="chanel-button-primary"
+            style={{
+              width: '100%',
+              padding: '1rem',
+              fontSize: '1rem',
               display: 'flex',
               alignItems: 'center',
-              gap: '0.25rem',
-            }}>
-              📱 모바일 공유용 URL
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
+              justifyContent: 'center',
               gap: '0.5rem',
-              backgroundColor: '#fff',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: '1px solid #3b82f6',
-            }}>
-              <code style={{
-                flex: 1,
-                fontSize: '0.75rem',
-                color: '#1e40af',
-                overflow: 'auto',
-                whiteSpace: 'nowrap',
-                fontWeight: '600',
-              }}>
-                {deployedUrl.replace('/view/', '/s/')}
-              </code>
-              <button
-                onClick={async () => {
-                  const mobileUrl = deployedUrl.replace('/view/', '/s/');
-                  await navigator.clipboard.writeText(mobileUrl);
-                  setIsCopied(true);
-                  setTimeout(() => setIsCopied(false), 2000);
-                }}
-                style={{
-                  padding: '0.375rem 0.75rem',
-                  backgroundColor: '#3b82f6',
-                  color: '#fff',
-                  border: 'none',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  transition: 'all 0.2s',
-                  fontWeight: '600',
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#2563eb';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#3b82f6';
-                }}
-              >
-                <Copy className="w-3 h-3" />
-                복사
-              </button>
-            </div>
-            <div style={{ fontSize: '0.7rem', color: '#1e40af', marginTop: '0.5rem', fontWeight: '500' }}>
-              💡 카카오톡/문자로 공유하면 브라우저에서 바로 열립니다 (다운로드 없음!)
-            </div>
-          </div>
+              textDecoration: 'none',
+              fontWeight: '700',
+            }}
+          >
+            <ExternalLink className="w-5 h-5" />
+            슬라이드 바로 열기
+          </a>
 
-          {/* 노션 임베드 URL */}
           <div style={{
-            marginTop: '0.75rem',
+            fontSize: '0.875rem',
+            color: '#059669',
+            marginTop: '1rem',
             padding: '0.75rem',
-            backgroundColor: '#f9fafb',
-            borderRadius: '8px',
-            border: '1px solid #e5e7eb',
+            backgroundColor: '#d1fae5',
+            borderRadius: '6px',
+            fontWeight: '500',
           }}>
-            <div style={{
-              fontSize: '0.75rem',
-              fontWeight: '600',
-              color: '#374151',
-              marginBottom: '0.5rem',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.25rem',
-            }}>
-              📄 노션 임베드용 URL
-            </div>
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem',
-              backgroundColor: '#fff',
-              padding: '0.5rem',
-              borderRadius: '4px',
-              border: '1px solid #e5e7eb',
-            }}>
-              <code style={{
-                flex: 1,
-                fontSize: '0.75rem',
-                color: '#1f2937',
-                overflow: 'auto',
-                whiteSpace: 'nowrap',
-              }}>
-                {deployedUrl.replace('/view/', '/embed/')}
-              </code>
-              <button
-                onClick={async () => {
-                  const embedUrl = deployedUrl.replace('/view/', '/embed/');
-                  await navigator.clipboard.writeText(embedUrl);
-                  setIsCopied(true);
-                  setTimeout(() => setIsCopied(false), 2000);
-                }}
-                style={{
-                  padding: '0.375rem 0.75rem',
-                  backgroundColor: '#fff',
-                  border: '1px solid #d1d5db',
-                  borderRadius: '4px',
-                  fontSize: '0.75rem',
-                  cursor: 'pointer',
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '0.25rem',
-                  transition: 'all 0.2s',
-                }}
-                onMouseOver={(e) => {
-                  e.currentTarget.style.backgroundColor = '#f9fafb';
-                  e.currentTarget.style.borderColor = '#9ca3af';
-                }}
-                onMouseOut={(e) => {
-                  e.currentTarget.style.backgroundColor = '#fff';
-                  e.currentTarget.style.borderColor = '#d1d5db';
-                }}
-              >
-                <Copy className="w-3 h-3" />
-                복사
-              </button>
-            </div>
-            <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '0.5rem' }}>
-              노션에서 <code style={{ fontSize: '0.7rem', backgroundColor: '#e5e7eb', padding: '0.125rem 0.25rem', borderRadius: '2px' }}>/embed</code> 명령어로 이 URL을 붙여넣으세요
-            </div>
-          </div>
-
-          <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
-            💡 이 링크를 공유하면 누구나 슬라이드를 볼 수 있습니다
+            💡 이 링크를 카카오톡/문자로 공유하면 브라우저에서 바로 열립니다!
           </div>
         </div>
       )}
