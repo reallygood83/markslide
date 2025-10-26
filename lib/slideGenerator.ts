@@ -413,27 +413,254 @@ body {
 
 // 테마별 스타일 생성
 function getThemeStyles(theme: Theme): string {
+  const hasGradient = theme.special?.gradient;
+  const hasShadow = theme.special?.shadow;
+  const hasBorder = theme.special?.border;
+  const highlight = theme.colors.highlight || theme.colors.secondary;
+
   return `
+/* 폰트 불러오기 */
+@import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;700&family=Poppins:wght@300;400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Merriweather:wght@300;400;700&family=Roboto:wght@300;400;500;700&family=Nunito:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Inter:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&display=swap');
+
 body {
   background: ${theme.colors.background};
+  ${hasGradient ? `background-image: ${theme.special?.gradient};` : ''}
   color: ${theme.colors.text};
+  font-family: ${theme.fonts.body};
 }
 
-.slide-content h1,
-.slide-content h2,
-.slide-content h3 {
+/* 표지 슬라이드 특별 스타일 */
+.slide-cover {
+  ${hasGradient ? `background: ${theme.special?.gradient} !important;` : `background: ${theme.colors.primary} !important;`}
+  ${hasShadow ? `box-shadow: inset ${theme.special?.shadow};` : ''}
+}
+
+.cover-title {
+  font-family: ${theme.fonts.heading} !important;
+  color: ${theme.colors.background} !important;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.3);
+  ${hasBorder ? `border-bottom: ${theme.special?.border};` : ''}
+  padding-bottom: 0.5rem;
+}
+
+.cover-subtitle {
+  color: ${theme.colors.accent} !important;
+  font-weight: 300;
+}
+
+.cover-author {
+  color: ${highlight} !important;
+  font-style: italic;
+}
+
+/* 콘텐츠 슬라이드 */
+.slide {
+  font-family: ${theme.fonts.body};
+}
+
+.slide-content {
+  ${hasShadow ? `box-shadow: ${theme.special?.shadow};` : ''}
+}
+
+.slide-content h1 {
+  font-family: ${theme.fonts.heading};
   color: ${theme.colors.primary};
+  ${hasBorder ? `border-left: 8px solid ${theme.colors.secondary};` : ''}
+  ${hasBorder ? `padding-left: 1.5rem;` : ''}
+  text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
+.slide-content h2 {
+  font-family: ${theme.fonts.heading};
+  color: ${theme.colors.secondary};
+  ${hasBorder ? `border-left: 6px solid ${highlight};` : ''}
+  ${hasBorder ? `padding-left: 1rem;` : ''}
+}
+
+.slide-content h3 {
+  font-family: ${theme.fonts.heading};
+  color: ${theme.colors.accent};
+  ${hasBorder ? `border-left: 4px solid ${theme.colors.accent};` : ''}
+  ${hasBorder ? `padding-left: 0.8rem;` : ''}
+}
+
+/* 강조 요소 */
+.slide-content strong {
+  color: ${highlight};
+  font-weight: 700;
+}
+
+.slide-content em {
+  color: ${theme.colors.secondary};
+  font-style: italic;
+}
+
+/* 리스트 스타일 */
+.slide-content ul li::marker {
+  color: ${theme.colors.primary};
+  font-weight: bold;
+}
+
+.slide-content ol li::marker {
+  color: ${theme.colors.secondary};
+  font-weight: bold;
+}
+
+/* 코드 블록 */
+.slide-content code {
+  background: ${theme.colors.primary}15;
+  color: ${theme.colors.primary};
+  border: 1px solid ${theme.colors.primary}30;
+  ${hasShadow ? `box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);` : ''}
+}
+
+.slide-content pre {
+  background: ${theme.colors.primary};
+  border-left: 5px solid ${highlight};
+  ${hasShadow ? `box-shadow: ${theme.special?.shadow};` : ''}
+}
+
+.slide-content pre code {
+  color: ${theme.colors.background};
+}
+
+/* 인용문 */
+.slide-content blockquote {
+  border-left: 5px solid ${theme.colors.primary};
+  padding-left: 1.5rem;
+  margin-left: 0;
+  font-style: italic;
+  color: ${theme.colors.secondary};
+  background: ${theme.colors.primary}08;
+  padding: 1rem 1rem 1rem 1.5rem;
+  border-radius: 0 8px 8px 0;
+}
+
+/* 테이블 */
+.slide-content table {
+  border-collapse: separate;
+  border-spacing: 0;
+  border-radius: 8px;
+  overflow: hidden;
+  ${hasShadow ? `box-shadow: ${theme.special?.shadow};` : ''}
+}
+
+.slide-content th {
+  background: ${theme.colors.primary};
+  color: ${theme.colors.background};
+  font-weight: 600;
+  padding: 12px 15px;
+  text-align: left;
+}
+
+.slide-content td {
+  padding: 10px 15px;
+  border-bottom: 1px solid ${theme.colors.primary}20;
+}
+
+.slide-content tr:nth-child(even) {
+  background: ${theme.colors.primary}05;
+}
+
+.slide-content tr:hover {
+  background: ${highlight}15;
+}
+
+/* 슬라이드 푸터 */
+.slide-footer {
+  border-top-color: ${theme.colors.primary};
+  color: ${theme.colors.secondary};
+}
+
+/* 컨트롤 버튼 */
 .control-btn {
   color: ${theme.colors.primary};
   border-color: ${theme.colors.primary};
+  background: ${theme.colors.background};
+  font-family: ${theme.fonts.body};
+  ${hasShadow ? `box-shadow: ${theme.special?.shadow};` : ''}
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 .control-btn:hover {
-  background: ${theme.colors.primary};
+  background: ${hasGradient ? theme.special?.gradient : theme.colors.primary};
   color: ${theme.colors.background};
+  transform: translateY(-3px);
+  ${hasShadow ? `box-shadow: ${theme.special?.shadow}, 0 8px 16px rgba(0, 0, 0, 0.2);` : ''}
 }
+
+.control-btn:active {
+  transform: translateY(-1px);
+}
+
+/* 특별 효과 */
+${theme.id === 'glassmorphism' ? `
+.slide {
+  background: rgba(255, 255, 255, 0.25);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+}
+` : ''}
+
+${theme.id === 'cyberpunk-neon' ? `
+.slide-content h1,
+.slide-content h2,
+.slide-content h3 {
+  text-shadow: 0 0 10px ${theme.colors.primary}, 0 0 20px ${theme.colors.primary}, 0 0 30px ${theme.colors.secondary};
+  animation: neonGlow 2s ease-in-out infinite alternate;
+}
+
+@keyframes neonGlow {
+  from {
+    text-shadow: 0 0 10px ${theme.colors.primary}, 0 0 20px ${theme.colors.primary}, 0 0 30px ${theme.colors.secondary};
+  }
+  to {
+    text-shadow: 0 0 20px ${theme.colors.primary}, 0 0 30px ${theme.colors.secondary}, 0 0 40px ${theme.colors.accent};
+  }
+}
+
+.slide-content code {
+  background: ${theme.colors.primary}30;
+  border: 1px solid ${theme.colors.primary};
+  box-shadow: 0 0 5px ${theme.colors.primary};
+}
+` : ''}
+
+${theme.id === 'chanel-noir' ? `
+.slide-content h1::before {
+  content: '';
+  display: inline-block;
+  width: 60px;
+  height: 4px;
+  background: ${theme.colors.secondary};
+  margin-right: 20px;
+  vertical-align: middle;
+}
+
+.slide-content h1::after {
+  content: '';
+  display: inline-block;
+  width: 60px;
+  height: 4px;
+  background: ${theme.colors.secondary};
+  margin-left: 20px;
+  vertical-align: middle;
+}
+` : ''}
+
+${theme.id === 'retro-vintage' ? `
+.slide {
+  border: ${theme.special?.border};
+  box-shadow: ${theme.special?.shadow};
+}
+
+.slide-content h1,
+.slide-content h2 {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+}
+` : ''}
   `;
 }
 
