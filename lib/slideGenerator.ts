@@ -419,7 +419,7 @@ function getThemeStyles(theme: Theme): string {
   const highlight = theme.colors.highlight || theme.colors.secondary;
 
   // 다크 테마 감지: isDark 플래그 사용
-  const isDark = theme.isDark || false;
+  const isDark = (theme as any).isDark || false;
 
   // 다크 테마일 때는 텍스트 색상을 밝게, 라이트 테마일 때는 어둡게
   const adaptiveTextColor = isDark ? '#FFFFFF' : theme.colors.text;
