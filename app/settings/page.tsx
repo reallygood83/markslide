@@ -324,7 +324,16 @@ export default function SettingsPage() {
             >
               배움의 달인
             </a>
-            {' '}| MIT License
+            {' '}|{' '}
+            <a
+              href="https://open.kakao.com/o/gubGYQ7g"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="chanel-button-secondary"
+              style={{ padding: '8px 16px', display: 'inline-block' }}
+            >
+              개발자에게 연락하기
+            </a>
           </p>
         </div>
       </footer>
