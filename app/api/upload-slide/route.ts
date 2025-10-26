@@ -36,17 +36,10 @@ export async function POST(request: NextRequest) {
       cacheControlMaxAge: 31536000, // 1년 캐시
     });
 
-    // 프록시 URL 생성 (브라우저에서 바로 볼 수 있도록)
-    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ||
-                    (request.headers.get('host')?.includes('localhost')
-                      ? 'http://localhost:3000'
-                      : 'https://markslide.vercel.app');
-    const viewUrl = `${baseUrl}/api/view-slide/${shortFilename}`;
-
+    // Blob URL을 직접 사용 (브라우저에서 바로 보이도록)
     return NextResponse.json({
       success: true,
-      url: viewUrl, // 프록시 URL 사용
-      blobUrl: blob.url, // 원본 Blob URL (필요시)
+      url: blob.url, // Blob Storage 직접 URL 사용
       downloadUrl: blob.downloadUrl,
       pathname: blob.pathname,
     });
