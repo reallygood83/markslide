@@ -5,32 +5,49 @@ const path = require('path');
 async function testSlideGeneration() {
   console.log('🧪 MarkSlide API 테스트 시작...\n');
 
-  // 테스트 마크다운 파일 읽기
-  const markdownPath = path.join(__dirname, 'test-presentation.md');
+  // 테스트 마크다운 파일 읽기 (다크 테마 테스트용)
+  const markdownPath = path.join(__dirname, 'test-slide.md');
   const markdownContent = fs.readFileSync(markdownPath, 'utf-8');
 
   console.log('📄 마크다운 파일 로드 완료');
   console.log(`📏 파일 크기: ${markdownContent.length} bytes\n`);
 
+  // 완전한 Chanel Noir 테마 객체 (다크 테마 텍스트 가시성 테스트용)
+  const chanelNoirTheme = {
+    id: 'chanel-noir',
+    name: 'Chanel Noir',
+    description: '샤넬 스타일 블랙 & 화이트 럭셔리 디자인',
+    thumbnail: '/themes/chanel-noir-thumb.png',
+    colors: {
+      primary: '#000000',
+      secondary: '#C5A572',
+      accent: '#FFFFFF',
+      background: '#FFFFFF',
+      text: '#000000',
+      highlight: '#C5A572',
+    },
+    fonts: {
+      heading: 'Playfair Display, serif',
+      body: 'Pretendard, sans-serif',
+    },
+    special: {
+      gradient: 'linear-gradient(135deg, #000000 0%, #2C2C2C 100%)',
+      shadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
+      border: '3px solid #C5A572',
+    },
+    isDark: true,
+  };
+
   // API 요청 데이터
   const requestData = {
     markdown: markdownContent,
     metadata: {
-      title: 'MarkSlide 소개',
-      subtitle: '마크다운으로 아름다운 슬라이드를',
-      author: 'Moon-Jung Kim',
-      pageCount: 10
+      title: '다크 테마 텍스트 가시성 테스트',
+      subtitle: 'Chanel Noir 테마 흰색 텍스트 검증',
+      author: '김문정',
+      pageCount: 5
     },
-    theme: {
-      name: 'Developer Education',
-      colors: {
-        primary: '#2563eb',
-        secondary: '#1e40af',
-        accent: '#3b82f6',
-        background: '#ffffff',
-        text: '#1f2937'
-      }
-    }
+    theme: chanelNoirTheme
   };
 
   console.log('📤 API 요청 데이터:', JSON.stringify(requestData, null, 2));

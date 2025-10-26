@@ -23,6 +23,8 @@ export interface Theme {
     border?: string;
     pattern?: string;
   };
+  // 다크 테마 여부 (gradient가 어두운 배경일 때 true)
+  isDark?: boolean;
 }
 
 export const themes: Theme[] = [
@@ -48,6 +50,7 @@ export const themes: Theme[] = [
       shadow: '0 8px 32px rgba(0, 0, 0, 0.15)',
       border: '3px solid #C5A572',
     },
+    isDark: true, // 다크 gradient 사용
   },
   {
     id: 'apple-keynote',
@@ -93,6 +96,7 @@ export const themes: Theme[] = [
       shadow: '0 0 20px rgba(0, 245, 255, 0.5), 0 0 40px rgba(255, 0, 255, 0.3)',
       border: '2px solid #00F5FF',
     },
+    isDark: true, // 다크 gradient 사용
   },
   {
     id: 'gradient-sunset',
