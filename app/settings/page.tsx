@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
+import { Header } from '@/components/Header';
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
@@ -129,18 +130,7 @@ export default function SettingsPage() {
 
   return (
     <div className="min-h-screen bg-white">
-      {/* Header */}
-      <header className="chanel-header">
-        <div className="chanel-container">
-          <Link href="/" className="chanel-logo">
-            <div className="chanel-logo-icon">M</div>
-            <div>
-              <h1 className="chanel-logo-text">MarkSlide</h1>
-              <p className="chanel-logo-subtitle">Markdown to Slides</p>
-            </div>
-          </Link>
-        </div>
-      </header>
+      <Header />
 
       {/* Main Content */}
       <main className="chanel-container" style={{ paddingTop: '2rem', paddingBottom: '2rem' }}>
