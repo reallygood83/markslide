@@ -33,11 +33,20 @@ export async function POST(request: NextRequest) {
       access: 'public', // 공개 URL 생성
       addRandomSuffix: false, // 타임스탬프로 이미 고유성 보장
       contentType: 'text/html; charset=utf-8', // HTML로 브라우저에서 열리도록
+      cacheControlMaxAge: 31536000, // 1년 캐시
     });
+
+    // 프록시 URL 생성 (브라우저에서 바로 볼 수 있도록)
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ||
+                    (request.headers.get('host')?.includes('localhost')
+                      ? 'http://localhost:3000'
+                      : 'https://markslide.vercel.app');
+    const viewUrl = `${baseUrl}/api/view-slide/${shortFilename}`;
 
     return NextResponse.json({
       success: true,
-      url: blob.url,
+      url: viewUrl, // 프록시 URL 사용
+      blobUrl: blob.url, // 원본 Blob URL (필요시)
       downloadUrl: blob.downloadUrl,
       pathname: blob.pathname,
     });

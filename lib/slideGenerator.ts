@@ -255,9 +255,9 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
-  justify-content: center; /* 내용을 중앙에 배치 */
-  overflow: hidden; /* 스크롤바 제거 */
-  max-height: calc(100vh - 180px); /* 패딩과 푸터 공간 확보 */
+  justify-content: flex-start;
+  overflow-y: auto; /* 스크롤 허용 */
+  max-height: calc(100vh - 180px);
 }
 
 .slide-content h1 {
