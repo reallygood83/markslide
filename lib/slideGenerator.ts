@@ -418,6 +418,14 @@ function getThemeStyles(theme: Theme): string {
   const hasBorder = theme.special?.border;
   const highlight = theme.colors.highlight || theme.colors.secondary;
 
+  // 다크 테마 감지: isDark 플래그 사용
+  const isDark = theme.isDark || false;
+
+  // 다크 테마일 때는 텍스트 색상을 밝게, 라이트 테마일 때는 어둡게
+  const adaptiveTextColor = isDark ? '#FFFFFF' : theme.colors.text;
+  const adaptivePrimaryColor = isDark ? theme.colors.accent : theme.colors.primary;
+  const adaptiveSecondaryColor = isDark ? theme.colors.secondary : theme.colors.secondary;
+
   return `
 /* 폰트 불러오기 */
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700;900&family=Montserrat:wght@300;400;600;700&family=Poppins:wght@300;400;600;700&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;400;600;700&family=Merriweather:wght@300;400;700&family=Roboto:wght@300;400;500;700&family=Nunito:wght@300;400;600;700&family=Noto+Sans+KR:wght@300;400;500;700&family=Inter:wght@300;400;500;700&family=Lato:wght@300;400;700&family=Open+Sans:wght@300;400;600;700&display=swap');
@@ -425,7 +433,7 @@ function getThemeStyles(theme: Theme): string {
 body {
   background: ${theme.colors.background};
   ${hasGradient ? `background-image: ${theme.special?.gradient};` : ''}
-  color: ${theme.colors.text};
+  color: ${adaptiveTextColor};
   font-family: ${theme.fonts.body};
 }
 
@@ -464,22 +472,22 @@ body {
 
 .slide-content h1 {
   font-family: ${theme.fonts.heading};
-  color: ${theme.colors.primary};
-  ${hasBorder ? `border-left: 8px solid ${theme.colors.secondary};` : ''}
+  color: ${adaptivePrimaryColor};
+  ${hasBorder ? `border-left: 8px solid ${adaptiveSecondaryColor};` : ''}
   ${hasBorder ? `padding-left: 1.5rem;` : ''}
   text-shadow: 1px 1px 3px rgba(0, 0, 0, 0.1);
 }
 
 .slide-content h2 {
   font-family: ${theme.fonts.heading};
-  color: ${theme.colors.secondary};
+  color: ${adaptiveSecondaryColor};
   ${hasBorder ? `border-left: 6px solid ${highlight};` : ''}
   ${hasBorder ? `padding-left: 1rem;` : ''}
 }
 
 .slide-content h3 {
   font-family: ${theme.fonts.heading};
-  color: ${theme.colors.accent};
+  color: ${isDark ? highlight : theme.colors.accent};
   ${hasBorder ? `border-left: 4px solid ${theme.colors.accent};` : ''}
   ${hasBorder ? `padding-left: 0.8rem;` : ''}
 }
@@ -491,47 +499,47 @@ body {
 }
 
 .slide-content em {
-  color: ${theme.colors.secondary};
+  color: ${adaptiveSecondaryColor};
   font-style: italic;
 }
 
 /* 리스트 스타일 */
 .slide-content ul li::marker {
-  color: ${theme.colors.primary};
+  color: ${adaptivePrimaryColor};
   font-weight: bold;
 }
 
 .slide-content ol li::marker {
-  color: ${theme.colors.secondary};
+  color: ${adaptiveSecondaryColor};
   font-weight: bold;
 }
 
 /* 코드 블록 */
 .slide-content code {
-  background: ${theme.colors.primary}15;
-  color: ${theme.colors.primary};
-  border: 1px solid ${theme.colors.primary}30;
+  background: ${isDark ? 'rgba(255, 255, 255, 0.1)' : theme.colors.primary + '15'};
+  color: ${adaptivePrimaryColor};
+  border: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.2)' : theme.colors.primary + '30'};
   ${hasShadow ? `box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);` : ''}
 }
 
 .slide-content pre {
-  background: ${theme.colors.primary};
+  background: ${isDark ? 'rgba(0, 0, 0, 0.3)' : theme.colors.primary};
   border-left: 5px solid ${highlight};
   ${hasShadow ? `box-shadow: ${theme.special?.shadow};` : ''}
 }
 
 .slide-content pre code {
-  color: ${theme.colors.background};
+  color: ${isDark ? adaptiveTextColor : theme.colors.background};
 }
 
 /* 인용문 */
 .slide-content blockquote {
-  border-left: 5px solid ${theme.colors.primary};
+  border-left: 5px solid ${adaptivePrimaryColor};
   padding-left: 1.5rem;
   margin-left: 0;
   font-style: italic;
-  color: ${theme.colors.secondary};
-  background: ${theme.colors.primary}08;
+  color: ${adaptiveSecondaryColor};
+  background: ${isDark ? 'rgba(255, 255, 255, 0.05)' : theme.colors.primary + '08'};
   padding: 1rem 1rem 1rem 1.5rem;
   border-radius: 0 8px 8px 0;
 }
@@ -546,8 +554,8 @@ body {
 }
 
 .slide-content th {
-  background: ${theme.colors.primary};
-  color: ${theme.colors.background};
+  background: ${adaptivePrimaryColor};
+  color: ${isDark ? theme.colors.background : theme.colors.background};
   font-weight: 600;
   padding: 12px 15px;
   text-align: left;
@@ -555,15 +563,16 @@ body {
 
 .slide-content td {
   padding: 10px 15px;
-  border-bottom: 1px solid ${theme.colors.primary}20;
+  border-bottom: 1px solid ${isDark ? 'rgba(255, 255, 255, 0.2)' : theme.colors.primary + '20'};
+  color: ${adaptiveTextColor};
 }
 
 .slide-content tr:nth-child(even) {
-  background: ${theme.colors.primary}05;
+  background: ${isDark ? 'rgba(255, 255, 255, 0.05)' : theme.colors.primary + '05'};
 }
 
 .slide-content tr:hover {
-  background: ${highlight}15;
+  background: ${isDark ? 'rgba(255, 255, 255, 0.1)' : highlight + '15'};
 }
 
 /* 슬라이드 푸터 */
