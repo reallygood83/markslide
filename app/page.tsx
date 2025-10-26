@@ -1,65 +1,120 @@
-import Image from "next/image";
+'use client';
+
+import { useState } from 'react';
+import { FileUpload } from '@/components/FileUpload';
+import { ThemeSelector } from '@/components/ThemeSelector';
+import { MetadataForm } from '@/components/MetadataForm';
+import { GenerateButton } from '@/components/GenerateButton';
+import { Header } from '@/components/Header';
+import { Theme } from '@/lib/themes';
 
 export default function Home() {
+  const [markdownFile, setMarkdownFile] = useState<File | null>(null);
+  const [markdownContent, setMarkdownContent] = useState<string>('');
+  const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
+  const [metadata, setMetadata] = useState({
+    title: '',
+    subtitle: '',
+    author: '',
+    pageCount: 10,
+  });
+
+  const handleFileSelect = async (file: File) => {
+    setMarkdownFile(file);
+    const content = await file.text();
+    setMarkdownContent(content);
+
+    // 첫 번째 H1 제목 자동 추출
+    const titleMatch = content.match(/^#\s+(.+)$/m);
+    if (titleMatch) {
+      setMetadata(prev => ({ ...prev, title: titleMatch[1] }));
+    }
+  };
+
+  const isReady = markdownFile && selectedTheme && metadata.title;
+
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex min-h-screen w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
-          </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
+    <div className="min-h-screen bg-white">
+      <Header />
+
+      {/* Hero Section */}
+      <div className="chanel-hero">
+        <div className="chanel-container">
+          <h1 className="chanel-hero-title">MarkSlide</h1>
+          <p className="chanel-hero-subtitle">Markdown to Slides</p>
+        </div>
+      </div>
+
+      {/* Main Content */}
+      <div className="chanel-container">
+        {/* Step 1: 파일 업로드 */}
+        <section className="chanel-section">
+          <div className="chanel-step-number">1</div>
+          <h2 className="chanel-step-title">마크다운 파일 업로드</h2>
+          <FileUpload onFileSelect={handleFileSelect} />
+          {markdownFile && (
+            <div className="chanel-file-info">
+              ✓ {markdownFile.name} ({(markdownFile.size / 1024).toFixed(2)} KB)
+            </div>
+          )}
+        </section>
+
+        {/* Step 2: 테마 선택 */}
+        {markdownFile && (
+          <section className="chanel-section animate-fade-in-up">
+            <div className="chanel-step-number">2</div>
+            <h2 className="chanel-step-title">테마 선택</h2>
+            <ThemeSelector
+              selectedTheme={selectedTheme}
+              onSelectTheme={setSelectedTheme}
+            />
+          </section>
+        )}
+
+        {/* Step 3: 메타데이터 입력 */}
+        {selectedTheme && (
+          <section className="chanel-section animate-fade-in-up">
+            <div className="chanel-step-number">3</div>
+            <h2 className="chanel-step-title">슬라이드 정보 입력</h2>
+            <MetadataForm
+              metadata={metadata}
+              onMetadataChange={setMetadata}
+              markdownContent={markdownContent}
+            />
+          </section>
+        )}
+
+        {/* Step 4: 생성 버튼 */}
+        {isReady && (
+          <section className="chanel-section animate-fade-in-up">
+            <div className="chanel-step-number">4</div>
+            <h2 className="chanel-step-title">슬라이드 생성</h2>
+            <GenerateButton
+              markdownContent={markdownContent}
+              theme={selectedTheme}
+              metadata={metadata}
+            />
+          </section>
+        )}
+      </div>
+
+      {/* Footer */}
+      <footer className="chanel-footer">
+        <div className="chanel-container">
+          <p>
+            &copy; 2025 Moon-Jung Kim |{' '}
             <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
+              href="https://www.youtube.com/@%EB%B0%B0%EC%9B%80%EC%9D%98%EB%8B%AC%EC%9D%B8-p5v"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="chanel-footer-link"
             >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+              배움의 달인
+            </a>
+            {' '}| MIT License
           </p>
         </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
+      </footer>
     </div>
   );
 }
