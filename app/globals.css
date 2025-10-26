@@ -260,6 +260,7 @@
 
 /* Input Fields */
 .chanel-input {
+  width: 100%;
   background: #ffffff;
   border: 2px solid #000000;
   padding: 1rem 1.5rem;
@@ -268,6 +269,7 @@
   font-weight: 400;
   color: #000000;
   transition: all 0.2s;
+  box-sizing: border-box;
 }
 
 .chanel-input:focus {
@@ -469,6 +471,37 @@
 .chanel-button-secondary:disabled {
   opacity: 0.5;
   cursor: not-allowed;
+}
+
+/* Slider Styles - Chanel Design */
+[data-slot="slider-track"] {
+  background-color: #e0e0e0 !important;
+  height: 8px !important;
+  border-radius: 0 !important;
+  border: 2px solid #000000;
+}
+
+[data-slot="slider-range"] {
+  background-color: #000000 !important;
+}
+
+[data-slot="slider-thumb"] {
+  width: 24px !important;
+  height: 24px !important;
+  border: 3px solid #000000 !important;
+  background-color: #ffffff !important;
+  border-radius: 0 !important;
+  cursor: pointer !important;
+  transition: all 0.2s ease !important;
+}
+
+[data-slot="slider-thumb"]:hover {
+  transform: scale(1.2);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
+}
+
+[data-slot="slider-thumb"]:active {
+  transform: scale(1.1);
 }
 
 /* Responsive */

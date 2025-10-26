@@ -13,12 +13,14 @@ interface GenerateButtonProps {
     author: string;
     pageCount: number;
   };
+  saveFolderHandle?: FileSystemDirectoryHandle | null;
 }
 
 export function GenerateButton({
   markdownContent,
   theme,
   metadata,
+  saveFolderHandle,
 }: GenerateButtonProps) {
   const [isGenerating, setIsGenerating] = useState(false);
   const [progress, setProgress] = useState(0);
@@ -54,16 +56,41 @@ export function GenerateButton({
         throw new Error('슬라이드 생성에 실패했습니다.');
       }
 
-      // HTML 파일 다운로드
+      // HTML 파일 다운로드 또는 저장
       const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = `${metadata.title || 'presentation'}.html`;
-      document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      document.body.removeChild(a);
+      const fileName = `${metadata.title || 'presentation'}.html`;
+
+      // File System Access API를 사용하여 사용자가 선택한 폴더에 저장
+      if (saveFolderHandle) {
+        try {
+          const fileHandle = await saveFolderHandle.getFileHandle(fileName, { create: true });
+          const writable = await fileHandle.createWritable();
+          await writable.write(blob);
+          await writable.close();
+          console.log('파일이 선택한 폴더에 저장되었습니다:', fileName);
+        } catch (error) {
+          console.error('폴더에 저장 실패, 다운로드로 대체:', error);
+          // 폴더 저장 실패 시 기본 다운로드로 대체
+          const url = window.URL.createObjectURL(blob);
+          const a = document.createElement('a');
+          a.href = url;
+          a.download = fileName;
+          document.body.appendChild(a);
+          a.click();
+          window.URL.revokeObjectURL(url);
+          document.body.removeChild(a);
+        }
+      } else {
+        // 폴더 선택 안 한 경우 기본 다운로드
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = fileName;
+        document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        document.body.removeChild(a);
+      }
 
       setProgress(100);
       setIsComplete(true);

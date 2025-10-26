@@ -12,6 +12,7 @@ export default function Home() {
   const [markdownFile, setMarkdownFile] = useState<File | null>(null);
   const [markdownContent, setMarkdownContent] = useState<string>('');
   const [selectedTheme, setSelectedTheme] = useState<Theme | null>(null);
+  const [saveFolderHandle, setSaveFolderHandle] = useState<FileSystemDirectoryHandle | null>(null);
   const [metadata, setMetadata] = useState({
     title: '',
     subtitle: '',
@@ -80,6 +81,7 @@ export default function Home() {
               metadata={metadata}
               onMetadataChange={setMetadata}
               markdownContent={markdownContent}
+              onSaveFolderChange={setSaveFolderHandle}
             />
           </section>
         )}
@@ -93,6 +95,7 @@ export default function Home() {
               markdownContent={markdownContent}
               theme={selectedTheme}
               metadata={metadata}
+              saveFolderHandle={saveFolderHandle}
             />
           </section>
         )}
