@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Download, Sparkles, Loader2, CheckCircle2, Globe, Copy } from 'lucide-react';
+import { Download, Sparkles, Loader2, CheckCircle2, Globe, Copy, ExternalLink } from 'lucide-react';
 import { Theme } from '@/lib/themes';
 
 interface GenerateButtonProps {
@@ -285,6 +285,30 @@ export function GenerateButton({
               {isCopied ? '복사됨!' : '복사'}
             </button>
           </div>
+
+          {/* 슬라이드 바로보기 버튼 */}
+          <div style={{ marginTop: '0.75rem', display: 'flex', gap: '0.5rem' }}>
+            <a
+              href={deployedUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="chanel-button-primary"
+              style={{
+                flex: 1,
+                padding: '0.75rem 1.5rem',
+                fontSize: '0.875rem',
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                gap: '0.5rem',
+                textDecoration: 'none',
+              }}
+            >
+              <ExternalLink className="w-4 h-4" />
+              슬라이드 바로보기
+            </a>
+          </div>
+
           <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
             💡 이 링크를 공유하면 누구나 슬라이드를 볼 수 있습니다
           </div>

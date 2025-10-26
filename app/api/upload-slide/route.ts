@@ -36,10 +36,18 @@ export async function POST(request: NextRequest) {
       cacheControlMaxAge: 31536000, // 1년 캐시
     });
 
-    // Blob URL을 직접 사용 (브라우저에서 바로 보이도록)
+    // 뷰어 페이지 URL 생성 (iframe으로 슬라이드를 표시)
+    const slideId = `slide-${timestamp}`;
+    const baseUrl = process.env.NEXT_PUBLIC_BASE_URL ||
+                    (request.headers.get('host')?.includes('localhost')
+                      ? 'http://localhost:3000'
+                      : 'https://markslide.vercel.app');
+    const viewerUrl = `${baseUrl}/view/${slideId}`;
+
     return NextResponse.json({
       success: true,
-      url: blob.url, // Blob Storage 직접 URL 사용
+      url: viewerUrl, // 뷰어 페이지 URL (iframe으로 슬라이드 표시)
+      blobUrl: blob.url, // 원본 Blob URL
       downloadUrl: blob.downloadUrl,
       pathname: blob.pathname,
     });
