@@ -12,15 +12,11 @@ interface SlideMetadata {
 
 /**
  * 마크다운 텍스트를 슬라이드로 분할
- * H1(#), H2(##) 또는 구분선(---)을 기준으로 분할
- * targetSlides가 지정되면 해당 개수에 최대한 맞추도록 조정
+ * 사용자가 선택한 페이지 수에 정확히 맞춤
  */
 export function splitMarkdownIntoSlides(markdown: string, targetSlides: number = 20): string[] {
-  const slides: string[] = [];
-
-  // 슬라이드 구분: H1, H2, 또는 --- (구분선)
+  // 1단계: H1, H2, --- 기준으로 자연스럽게 분할
   const slideDelimiters = /(?=^#\s)|(?=^##\s)|(?=^---$)/gm;
-
   let parts = markdown.split(slideDelimiters).filter(Boolean);
 
   // 빈 슬라이드 제거
@@ -33,47 +29,80 @@ export function splitMarkdownIntoSlides(markdown: string, targetSlides: number =
     return [markdown];
   }
 
-  // 자연스럽게 분할된 슬라이드가 목표 개수와 비슷하면 그대로 사용
-  // (±30% 범위 내)
-  const lowerBound = Math.floor(targetSlides * 0.7);
-  const upperBound = Math.ceil(targetSlides * 1.3);
-
-  if (parts.length >= lowerBound && parts.length <= upperBound) {
-    return parts.slice(0, targetSlides);
+  // 2단계: 목표 페이지 수에 맞게 조정
+  if (parts.length === targetSlides) {
+    return parts; // 정확히 일치하면 그대로 사용
   }
 
-  // 슬라이드가 너무 많으면 줄이기
   if (parts.length > targetSlides) {
-    return parts.slice(0, targetSlides);
+    // 슬라이드가 많으면 일부 병합
+    return mergeSlides(parts, targetSlides);
+  } else {
+    // 슬라이드가 적으면 분할 확장
+    return expandSlides(parts, targetSlides);
+  }
+}
+
+/**
+ * 슬라이드를 병합하여 목표 개수로 줄임
+ */
+function mergeSlides(slides: string[], targetCount: number): string[] {
+  const result: string[] = [];
+  const groupSize = Math.ceil(slides.length / targetCount);
+
+  for (let i = 0; i < slides.length; i += groupSize) {
+    const group = slides.slice(i, i + groupSize);
+    result.push(group.join('\n\n'));
   }
 
-  // 슬라이드가 너무 적으면 내용을 더 세밀하게 분할
-  // 각 슬라이드를 문단 단위로 더 분할
-  if (parts.length < lowerBound) {
-    const expandedSlides: string[] = [];
-    const slidesNeeded = targetSlides - parts.length;
-    const slidesToExpand = Math.min(slidesNeeded, parts.length);
+  return result.slice(0, targetCount);
+}
 
-    parts.forEach((part, index) => {
-      // 일부 슬라이드만 확장 (길이가 긴 것부터)
-      if (index < slidesToExpand && part.length > 200) {
-        // 문단 단위로 분할
-        const paragraphs = part.split(/\n\n+/).filter(p => p.trim());
-        if (paragraphs.length > 1) {
-          // 각 문단을 별도 슬라이드로
-          paragraphs.forEach(p => expandedSlides.push(p.trim()));
-        } else {
-          expandedSlides.push(part);
-        }
+/**
+ * 슬라이드를 확장하여 목표 개수로 늘림
+ */
+function expandSlides(slides: string[], targetCount: number): string[] {
+  const result: string[] = [];
+  const slidesNeeded = targetCount - slides.length;
+
+  // 긴 슬라이드부터 우선 분할
+  const slidesWithLength = slides.map((slide, index) => ({
+    content: slide,
+    index,
+    length: slide.length
+  })).sort((a, b) => b.length - a.length);
+
+  const toExpand = slidesWithLength.slice(0, slidesNeeded);
+  const expandIndexes = new Set(toExpand.map(s => s.index));
+
+  slides.forEach((slide, index) => {
+    if (expandIndexes.has(index) && slide.length > 200) {
+      // 문단 단위로 분할 (최대 2개로 분할)
+      const paragraphs = slide.split(/\n\n+/).filter(p => p.trim());
+
+      if (paragraphs.length >= 2) {
+        const mid = Math.ceil(paragraphs.length / 2);
+        result.push(paragraphs.slice(0, mid).join('\n\n'));
+        result.push(paragraphs.slice(mid).join('\n\n'));
       } else {
-        expandedSlides.push(part);
+        // 리스트 항목으로 분할 시도
+        const items = slide.split(/\n[-*•]\s+/).filter(p => p.trim());
+        if (items.length >= 2) {
+          const mid = Math.ceil(items.length / 2);
+          const firstPart = items[0] + '\n' + items.slice(1, mid).map(i => `- ${i}`).join('\n');
+          const secondPart = items[0] + '\n' + items.slice(mid).map(i => `- ${i}`).join('\n');
+          result.push(firstPart);
+          result.push(secondPart);
+        } else {
+          result.push(slide);
+        }
       }
-    });
+    } else {
+      result.push(slide);
+    }
+  });
 
-    return expandedSlides.slice(0, targetSlides);
-  }
-
-  return parts;
+  return result.slice(0, targetCount);
 }
 
 /**
@@ -130,8 +159,8 @@ export async function generatePresentationHtml(
     </section>
   `;
 
-  // 마크다운을 슬라이드로 분할
-  const slideContents = splitMarkdownIntoSlides(markdown, metadata.pageCount);
+  // 마크다운을 슬라이드로 분할 (표지 제외하고 목표 개수 -1)
+  const slideContents = splitMarkdownIntoSlides(markdown, metadata.pageCount - 1);
 
   // 각 슬라이드 HTML 생성
   const slideHtmls = await Promise.all(
@@ -186,7 +215,7 @@ function generateFullHtml(
 </html>`;
 }
 
-// 기본 스타일
+// 기본 스타일 - 스크롤 제거 및 PPT 스타일 최적화
 const baseStyles = `
 * {
   margin: 0;
@@ -211,10 +240,11 @@ body {
   padding: 60px 80px;
   display: none;
   flex-direction: column;
-  justify-content: center;
+  justify-content: flex-start; /* 상단 정렬로 공간 활용 */
   position: absolute;
   top: 0;
   left: 0;
+  overflow: hidden; /* 스크롤 완전 제거 */
 }
 
 .slide.active {
@@ -223,39 +253,46 @@ body {
 
 .slide-content {
   flex: 1;
-  overflow-y: auto;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* 내용을 중앙에 배치 */
+  overflow: hidden; /* 스크롤바 제거 */
+  max-height: calc(100vh - 180px); /* 패딩과 푸터 공간 확보 */
 }
 
 .slide-content h1 {
-  font-size: 3rem;
-  margin-bottom: 1.5rem;
+  font-size: 2.5rem;
+  margin-bottom: 1rem;
+  line-height: 1.2;
 }
 
 .slide-content h2 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 2rem;
+  margin-bottom: 0.8rem;
+  line-height: 1.3;
 }
 
 .slide-content h3 {
-  font-size: 2rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.6rem;
+  margin-bottom: 0.6rem;
+  line-height: 1.4;
 }
 
 .slide-content p {
-  font-size: 1.5rem;
-  line-height: 1.8;
-  margin-bottom: 1rem;
+  font-size: 1.3rem;
+  line-height: 1.6;
+  margin-bottom: 0.8rem;
 }
 
 .slide-content ul, .slide-content ol {
-  font-size: 1.5rem;
-  line-height: 2;
+  font-size: 1.3rem;
+  line-height: 1.8;
   margin-left: 2rem;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
 }
 
 .slide-content li {
-  margin-bottom: 0.5rem;
+  margin-bottom: 0.4rem;
 }
 
 .slide-content code {
@@ -263,15 +300,17 @@ body {
   padding: 2px 8px;
   border-radius: 4px;
   font-family: 'Monaco', 'Courier New', monospace;
+  font-size: 1.1rem;
 }
 
 .slide-content pre {
   background: #1e1e1e;
   color: #d4d4d4;
-  padding: 20px;
+  padding: 15px;
   border-radius: 8px;
   overflow-x: auto;
-  margin-bottom: 1rem;
+  margin-bottom: 0.8rem;
+  font-size: 1rem;
 }
 
 .slide-content pre code {
@@ -281,10 +320,11 @@ body {
 }
 
 .slide-footer {
-  margin-top: 40px;
-  padding-top: 20px;
+  margin-top: 20px;
+  padding-top: 15px;
   border-top: 2px solid currentColor;
   opacity: 0.5;
+  flex-shrink: 0; /* 푸터가 항상 보이도록 */
 }
 
 .slide-number {
@@ -299,14 +339,15 @@ body {
 }
 
 .cover-title {
-  font-size: 4rem;
+  font-size: 3.5rem;
   font-weight: 700;
-  margin-bottom: 2rem;
+  margin-bottom: 1.5rem;
+  line-height: 1.2;
 }
 
 .cover-subtitle {
   font-size: 2rem;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
   opacity: 0.8;
 }
 
@@ -333,6 +374,7 @@ body {
   border: 2px solid currentColor;
   background: transparent;
   transition: all 0.3s ease;
+  border-radius: 4px;
 }
 
 .control-btn:hover {
@@ -354,6 +396,18 @@ body {
     position: relative;
     display: flex !important;
   }
+}
+
+/* 작은 화면 대응 */
+@media (max-height: 800px) {
+  .slide {
+    padding: 40px 60px;
+  }
+
+  .slide-content h1 { font-size: 2rem; }
+  .slide-content h2 { font-size: 1.6rem; }
+  .slide-content h3 { font-size: 1.4rem; }
+  .slide-content p, .slide-content ul, .slide-content ol { font-size: 1.1rem; }
 }
 `;
 
@@ -421,9 +475,33 @@ document.getElementById('nextBtn').addEventListener('click', nextSlide);
 // 키보드 이벤트
 document.addEventListener('keydown', (e) => {
   if (e.key === 'ArrowRight' || e.key === ' ') {
+    e.preventDefault();
     nextSlide();
   } else if (e.key === 'ArrowLeft') {
+    e.preventDefault();
     prevSlide();
   }
 });
+
+// 터치 스와이프 지원 (모바일)
+let touchStartX = 0;
+let touchEndX = 0;
+
+document.addEventListener('touchstart', (e) => {
+  touchStartX = e.changedTouches[0].screenX;
+});
+
+document.addEventListener('touchend', (e) => {
+  touchEndX = e.changedTouches[0].screenX;
+  handleSwipe();
+});
+
+function handleSwipe() {
+  if (touchEndX < touchStartX - 50) {
+    nextSlide(); // 왼쪽 스와이프
+  }
+  if (touchEndX > touchStartX + 50) {
+    prevSlide(); // 오른쪽 스와이프
+  }
+}
 `;
