@@ -11,18 +11,19 @@ export default function SlideViewerPage() {
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    // slideId에서 Blob URL 구성
-    const constructBlobUrl = async () => {
+    // slideId에서 Blob URL 직접 구성 (환경변수에서 store ID 추출 불필요)
+    const constructBlobUrl = () => {
       try {
-        // API를 통해 Blob URL 가져오기
-        const response = await fetch(`/api/get-slide-url?slideId=${slideId}`);
+        // Vercel Blob Storage의 public URL 패턴 사용
+        // 실제 store ID는 서버에서만 알 수 있으므로,
+        // 업로드 시 받은 blobUrl을 localStorage에 저장하거나
+        // 여기서는 공개 URL 패턴을 사용
 
-        if (!response.ok) {
-          throw new Error('슬라이드를 찾을 수 없습니다.');
-        }
+        // 간단한 방법: NEXT_PUBLIC으로 store ID를 공개
+        const storeId = process.env.NEXT_PUBLIC_BLOB_STORE_ID || 'LXLWj13VLXSG9AOD';
+        const url = `https://${storeId}.public.blob.vercel-storage.com/${slideId}.html`;
 
-        const data = await response.json();
-        setBlobUrl(data.url);
+        setBlobUrl(url);
         setIsLoading(false);
       } catch (err) {
         setError(err instanceof Error ? err.message : '슬라이드를 불러오는 중 오류가 발생했습니다.');
