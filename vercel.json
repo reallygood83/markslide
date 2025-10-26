@@ -1,11 +1,4 @@
 {
-  "redirects": [
-    {
-      "source": "/view/:slideId",
-      "destination": "https://lxlwj13vlxsg9aod.public.blob.vercel-storage.com/:slideId.html",
-      "permanent": false
-    }
-  ],
   "headers": [
     {
       "source": "/view/:slideId",
