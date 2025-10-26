@@ -7,10 +7,7 @@ export function Header() {
     <header className="chanel-header sticky top-0 z-50">
       <div className="chanel-container">
         <div className="flex items-center justify-between">
-          <Link href="/" className="flex items-center space-x-3">
-            <div className="w-10 h-10 bg-black flex items-center justify-center">
-              <span className="text-white font-bold text-xl">M</span>
-            </div>
+          <Link href="/" className="flex items-center">
             <div>
               <h1 className="chanel-logo">MarkSlide</h1>
               <p className="chanel-tagline">Markdown to Slides</p>
