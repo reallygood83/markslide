@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { buildBlobUrl } from '@/lib/storage/vercelBlob';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,26 +13,13 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    // BLOB_READ_WRITE_TOKEN에서 store ID 추출
-    const token = process.env.BLOB_READ_WRITE_TOKEN;
-    if (!token) {
+    const blobUrl = buildBlobUrl(slideId);
+    if (!blobUrl) {
       return NextResponse.json(
         { error: 'Blob Storage 설정이 없습니다.' },
         { status: 500 }
       );
     }
-
-    // 토큰에서 store ID 추출
-    const storeIdMatch = token.match(/vercel_blob_rw_([A-Za-z0-9]+)_/);
-    if (!storeIdMatch) {
-      return NextResponse.json(
-        { error: 'Blob Storage 토큰 형식이 잘못되었습니다.' },
-        { status: 500 }
-      );
-    }
-
-    const storeId = storeIdMatch[1];
-    const blobUrl = `https://${storeId}.public.blob.vercel-storage.com/${slideId}.html`;
 
     // Blob URL이 존재하는지 확인
     const checkResponse = await fetch(blobUrl, { method: 'HEAD' });
