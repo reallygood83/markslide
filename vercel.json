@@ -1,0 +1,13 @@
+{
+  "headers": [
+    {
+      "source": "/view/:slideId",
+      "headers": [
+        {
+          "key": "Cache-Control",
+          "value": "no-cache, no-store, must-revalidate"
+        }
+      ]
+    }
+  ]
+}
