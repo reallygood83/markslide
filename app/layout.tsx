@@ -21,7 +21,7 @@ export const metadata: Metadata = {
   keywords: ["markdown", "slides", "presentation", "marp", "AI", "gemini"],
   authors: [{ name: "MarkSlide" }],
   creator: "MarkSlide",
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'https://markslide.vercel.app'),
+  metadataBase: new URL('https://markslide.teaboard.link'),
   openGraph: {
     title: "MarkSlide - Markdown to Slides",
     description: "Transform your Markdown into beautiful presentation slides with AI-powered content generation and Chanel-inspired design.",
