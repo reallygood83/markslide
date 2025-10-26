@@ -1,3 +1,4 @@
+import { head } from '@vercel/blob';
 import { NextRequest, NextResponse } from 'next/server';
 
 export async function GET(
@@ -7,11 +8,18 @@ export async function GET(
   try {
     const { filename } = await params;
 
-    // Blob Storage URL 구성
-    const blobUrl = `https://lxlwj13vlxsg9aod.public.blob.vercel-storage.com/${filename}`;
+    // Vercel Blob에서 파일 메타데이터 확인
+    const blob = await head(filename);
+
+    if (!blob) {
+      return NextResponse.json(
+        { error: '슬라이드를 찾을 수 없습니다.' },
+        { status: 404 }
+      );
+    }
 
     // Blob Storage에서 파일 가져오기
-    const response = await fetch(blobUrl);
+    const response = await fetch(blob.url);
 
     if (!response.ok) {
       return NextResponse.json(

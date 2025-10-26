@@ -119,8 +119,7 @@ export default function Home() {
               href="https://open.kakao.com/o/gubGYQ7g"
               target="_blank"
               rel="noopener noreferrer"
-              className="chanel-button-secondary"
-              style={{ padding: '8px 16px', display: 'inline-block' }}
+              className="chanel-footer-link"
             >
               개발자에게 연락하기
             </a>
