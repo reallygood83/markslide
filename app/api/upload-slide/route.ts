@@ -3,6 +3,16 @@ import { NextRequest, NextResponse } from 'next/server';
 
 export async function POST(request: NextRequest) {
   try {
+    // 환경 변수 확인
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json(
+        {
+          error: 'BLOB_READ_WRITE_TOKEN 환경 변수가 설정되지 않았습니다. Vercel 대시보드에서 Blob Storage를 생성하고 토큰을 설정해주세요.'
+        },
+        { status: 500 }
+      );
+    }
+
     const formData = await request.formData();
     const file = formData.get('file') as File;
     const filename = formData.get('filename') as string;

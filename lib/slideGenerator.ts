@@ -13,8 +13,9 @@ interface SlideMetadata {
 /**
  * 마크다운 텍스트를 슬라이드로 분할
  * H1(#), H2(##) 또는 구분선(---)을 기준으로 분할
+ * targetSlides가 지정되면 해당 개수에 최대한 맞추도록 조정
  */
-export function splitMarkdownIntoSlides(markdown: string, maxSlides: number = 20): string[] {
+export function splitMarkdownIntoSlides(markdown: string, targetSlides: number = 20): string[] {
   const slides: string[] = [];
 
   // 슬라이드 구분: H1, H2, 또는 --- (구분선)
@@ -22,20 +23,57 @@ export function splitMarkdownIntoSlides(markdown: string, maxSlides: number = 20
 
   let parts = markdown.split(slideDelimiters).filter(Boolean);
 
-  // 너무 많은 슬라이드 생성 방지
-  if (parts.length > maxSlides) {
-    parts = parts.slice(0, maxSlides);
-  }
-
   // 빈 슬라이드 제거
-  parts.forEach(part => {
+  parts = parts.filter(part => {
     const trimmed = part.trim();
-    if (trimmed && trimmed !== '---') {
-      slides.push(trimmed);
-    }
+    return trimmed && trimmed !== '---';
   });
 
-  return slides.length > 0 ? slides : [markdown];
+  if (parts.length === 0) {
+    return [markdown];
+  }
+
+  // 자연스럽게 분할된 슬라이드가 목표 개수와 비슷하면 그대로 사용
+  // (±30% 범위 내)
+  const lowerBound = Math.floor(targetSlides * 0.7);
+  const upperBound = Math.ceil(targetSlides * 1.3);
+
+  if (parts.length >= lowerBound && parts.length <= upperBound) {
+    return parts.slice(0, targetSlides);
+  }
+
+  // 슬라이드가 너무 많으면 줄이기
+  if (parts.length > targetSlides) {
+    return parts.slice(0, targetSlides);
+  }
+
+  // 슬라이드가 너무 적으면 내용을 더 세밀하게 분할
+  // 각 슬라이드를 문단 단위로 더 분할
+  if (parts.length < lowerBound) {
+    const expandedSlides: string[] = [];
+    const slidesNeeded = targetSlides - parts.length;
+    const slidesToExpand = Math.min(slidesNeeded, parts.length);
+
+    parts.forEach((part, index) => {
+      // 일부 슬라이드만 확장 (길이가 긴 것부터)
+      if (index < slidesToExpand && part.length > 200) {
+        // 문단 단위로 분할
+        const paragraphs = part.split(/\n\n+/).filter(p => p.trim());
+        if (paragraphs.length > 1) {
+          // 각 문단을 별도 슬라이드로
+          paragraphs.forEach(p => expandedSlides.push(p.trim()));
+        } else {
+          expandedSlides.push(part);
+        }
+      } else {
+        expandedSlides.push(part);
+      }
+    });
+
+    return expandedSlides.slice(0, targetSlides);
+  }
+
+  return parts;
 }
 
 /**
