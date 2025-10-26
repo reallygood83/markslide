@@ -309,6 +309,80 @@ export function GenerateButton({
             </a>
           </div>
 
+          {/* 노션 임베드 URL */}
+          <div style={{
+            marginTop: '0.75rem',
+            padding: '0.75rem',
+            backgroundColor: '#f9fafb',
+            borderRadius: '8px',
+            border: '1px solid #e5e7eb',
+          }}>
+            <div style={{
+              fontSize: '0.75rem',
+              fontWeight: '600',
+              color: '#374151',
+              marginBottom: '0.5rem',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.25rem',
+            }}>
+              📄 노션 임베드용 URL
+            </div>
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              backgroundColor: '#fff',
+              padding: '0.5rem',
+              borderRadius: '4px',
+              border: '1px solid #e5e7eb',
+            }}>
+              <code style={{
+                flex: 1,
+                fontSize: '0.75rem',
+                color: '#1f2937',
+                overflow: 'auto',
+                whiteSpace: 'nowrap',
+              }}>
+                {deployedUrl.replace('/view/', '/embed/')}
+              </code>
+              <button
+                onClick={async () => {
+                  const embedUrl = deployedUrl.replace('/view/', '/embed/');
+                  await navigator.clipboard.writeText(embedUrl);
+                  setIsCopied(true);
+                  setTimeout(() => setIsCopied(false), 2000);
+                }}
+                style={{
+                  padding: '0.375rem 0.75rem',
+                  backgroundColor: '#fff',
+                  border: '1px solid #d1d5db',
+                  borderRadius: '4px',
+                  fontSize: '0.75rem',
+                  cursor: 'pointer',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.25rem',
+                  transition: 'all 0.2s',
+                }}
+                onMouseOver={(e) => {
+                  e.currentTarget.style.backgroundColor = '#f9fafb';
+                  e.currentTarget.style.borderColor = '#9ca3af';
+                }}
+                onMouseOut={(e) => {
+                  e.currentTarget.style.backgroundColor = '#fff';
+                  e.currentTarget.style.borderColor = '#d1d5db';
+                }}
+              >
+                <Copy className="w-3 h-3" />
+                복사
+              </button>
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#6b7280', marginTop: '0.5rem' }}>
+              노션에서 <code style={{ fontSize: '0.7rem', backgroundColor: '#e5e7eb', padding: '0.125rem 0.25rem', borderRadius: '2px' }}>/embed</code> 명령어로 이 URL을 붙여넣으세요
+            </div>
+          </div>
+
           <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
             💡 이 링크를 공유하면 누구나 슬라이드를 볼 수 있습니다
           </div>
