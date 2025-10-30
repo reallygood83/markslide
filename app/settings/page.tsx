@@ -63,6 +63,12 @@ export default function SettingsPage() {
     }
 
     localStorage.setItem('gemini_api_key', apiKey);
+    console.log('✅ API 키 저장 완료:', apiKey.substring(0, 10) + '...');
+
+    // 저장 확인
+    const savedKey = localStorage.getItem('gemini_api_key');
+    console.log('✅ 저장된 키 확인:', savedKey?.substring(0, 10) + '...');
+
     alert('API 키가 저장되었습니다!');
   };
 

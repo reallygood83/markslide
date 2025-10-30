@@ -26,8 +26,10 @@ export function TextToMarkdownConverter() {
   useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedKey = localStorage.getItem('gemini_api_key');
+      console.log('🔍 localStorage에서 API 키 로드:', savedKey ? savedKey.substring(0, 10) + '...' : '없음');
       if (savedKey) {
         setApiKey(savedKey);
+        console.log('✅ API 키 state에 설정 완료');
       }
     }
   }, []);
@@ -41,7 +43,16 @@ export function TextToMarkdownConverter() {
     // localStorage에서 API 키 다시 확인
     const currentApiKey = apiKey || (typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null);
 
+    console.log('🔍 변환 시작 - state의 API 키:', apiKey ? apiKey.substring(0, 10) + '...' : '없음');
+    console.log('🔍 변환 시작 - localStorage의 API 키:',
+      typeof window !== 'undefined' && localStorage.getItem('gemini_api_key')
+        ? localStorage.getItem('gemini_api_key')!.substring(0, 10) + '...'
+        : '없음'
+    );
+    console.log('🔍 최종 사용할 API 키:', currentApiKey ? currentApiKey.substring(0, 10) + '...' : '없음');
+
     if (!currentApiKey) {
+      console.error('❌ API 키가 없습니다!');
       alert('API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요.');
       return;
     }
