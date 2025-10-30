@@ -6,6 +6,7 @@ import { Header } from '@/components/Header';
 
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
+  const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash-exp');
   const [text, setText] = useState('');
   const [markdown, setMarkdown] = useState('');
   const [isConverting, setIsConverting] = useState(false);
@@ -55,7 +56,7 @@ export default function SettingsPage() {
     }
   };
 
-  // API 키 저장
+  // API 키 및 모델 저장
   const handleSaveApiKey = () => {
     if (!apiKey.trim()) {
       alert('API 키를 입력해주세요.');
@@ -63,13 +64,17 @@ export default function SettingsPage() {
     }
 
     localStorage.setItem('gemini_api_key', apiKey);
+    localStorage.setItem('gemini_model', selectedModel);
     console.log('✅ API 키 저장 완료:', apiKey.substring(0, 10) + '...');
+    console.log('✅ 선택된 모델:', selectedModel);
 
     // 저장 확인
     const savedKey = localStorage.getItem('gemini_api_key');
+    const savedModel = localStorage.getItem('gemini_model');
     console.log('✅ 저장된 키 확인:', savedKey?.substring(0, 10) + '...');
+    console.log('✅ 저장된 모델 확인:', savedModel);
 
-    alert('API 키가 저장되었습니다!');
+    alert(`API 키와 모델(${selectedModel})이 저장되었습니다!`);
   };
 
   // 텍스트를 마크다운으로 변환
@@ -170,6 +175,40 @@ export default function SettingsPage() {
                   placeholder="Google AI Studio에서 발급받은 API 키를 입력하세요"
                   className="chanel-input"
                 />
+              </div>
+
+              <div>
+                <label htmlFor="model" className="chanel-label">
+                  Gemini 모델 선택
+                </label>
+                <select
+                  id="model"
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
+                  className="chanel-input"
+                  style={{ cursor: 'pointer' }}
+                >
+                  <option value="gemini-2.0-flash-exp">
+                    Gemini 2.0 Flash Experimental (빠름, 실험 기능)
+                  </option>
+                  <option value="gemini-2.5-flash">
+                    Gemini 2.5 Flash (최신 모델, 더 정확함)
+                  </option>
+                  <option value="gemini-1.5-flash">
+                    Gemini 1.5 Flash (안정적)
+                  </option>
+                  <option value="gemini-1.5-pro">
+                    Gemini 1.5 Pro (고성능, 느림)
+                  </option>
+                </select>
+                <p style={{
+                  fontSize: '0.875rem',
+                  color: '#666',
+                  marginTop: '0.5rem',
+                  fontFamily: 'Inter, sans-serif'
+                }}>
+                  💡 <strong>추천:</strong> Gemini 2.5 Flash - 최신 모델로 더 정확한 슬라이드 분리
+                </p>
               </div>
 
               <div className="flex gap-3">

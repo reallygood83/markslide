@@ -40,8 +40,9 @@ export function TextToMarkdownConverter() {
       return;
     }
 
-    // localStorage에서 API 키 다시 확인
+    // localStorage에서 API 키와 모델 확인
     const currentApiKey = apiKey || (typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null);
+    const selectedModel = typeof window !== 'undefined' ? localStorage.getItem('gemini_model') : null;
 
     console.log('🔍 변환 시작 - state의 API 키:', apiKey ? apiKey.substring(0, 10) + '...' : '없음');
     console.log('🔍 변환 시작 - localStorage의 API 키:',
@@ -50,6 +51,7 @@ export function TextToMarkdownConverter() {
         : '없음'
     );
     console.log('🔍 최종 사용할 API 키:', currentApiKey ? currentApiKey.substring(0, 10) + '...' : '없음');
+    console.log('🔍 선택된 모델:', selectedModel || 'gemini-2.0-flash-exp (기본값)');
 
     if (!currentApiKey) {
       console.error('❌ API 키가 없습니다!');
@@ -66,6 +68,7 @@ export function TextToMarkdownConverter() {
         body: JSON.stringify({
           text: inputText,
           apiKey: currentApiKey,
+          model: selectedModel || 'gemini-2.0-flash-exp',
           pageCount: pageCount,
         }),
       });

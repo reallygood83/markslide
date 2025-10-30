@@ -337,12 +337,14 @@ function validateMarkdownQuality(markdown: string): {
  * @param text - 변환할 일반 텍스트
  * @param apiKey - Gemini API 키 (선택사항, 없으면 환경 변수 사용)
  * @param pageCount - 목표 슬라이드 페이지 수 (선택사항, 자동 계산)
+ * @param modelName - 사용할 Gemini 모델명 (선택사항, 기본값: gemini-2.0-flash-exp)
  * @returns 마크다운 형식으로 변환된 텍스트와 메타데이터
  */
 export async function convertTextToMarkdown(
   text: string,
   apiKey?: string,
-  pageCount?: number
+  pageCount?: number,
+  modelName?: string
 ): Promise<{
   markdown: string;
   metadata: {
@@ -354,7 +356,10 @@ export async function convertTextToMarkdown(
 }> {
   try {
     const genAI = getGeminiClient(apiKey);
-    const model = genAI.getGenerativeModel({ model: 'gemini-2.0-flash-exp' });
+    const selectedModel = modelName || 'gemini-2.0-flash-exp';
+    const model = genAI.getGenerativeModel({ model: selectedModel });
+
+    console.log('🚀 사용 중인 Gemini 모델:', selectedModel);
 
     // 페이지 수 자동 계산 (텍스트 길이 기반)
     // 평균 한글 800자 = 슬라이드 1페이지

@@ -4,7 +4,7 @@ import { convertTextToMarkdown } from '@/lib/gemini';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { text, apiKey, pageCount } = body;
+    const { text, apiKey, model, pageCount } = body;
 
     // 입력 검증
     if (!text || typeof text !== 'string') {
@@ -40,7 +40,7 @@ export async function POST(request: NextRequest) {
     }
 
     // Gemini API를 사용하여 텍스트를 MarkSlide 최적화 마크다운으로 변환
-    const result = await convertTextToMarkdown(text, apiKey, pageCount);
+    const result = await convertTextToMarkdown(text, apiKey, pageCount, model);
 
     return NextResponse.json({
       success: true,
