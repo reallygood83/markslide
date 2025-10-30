@@ -4,7 +4,7 @@ import { convertTextToMarkdown } from '@/lib/gemini';
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { text, apiKey } = body;
+    const { text, apiKey, pageCount } = body;
 
     // 입력 검증
     if (!text || typeof text !== 'string') {
@@ -21,6 +21,16 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // pageCount 검증 (선택사항)
+    if (pageCount !== undefined) {
+      if (typeof pageCount !== 'number' || pageCount < 3 || pageCount > 25) {
+        return NextResponse.json(
+          { error: '페이지 수는 3-25 사이의 숫자여야 합니다.' },
+          { status: 400 }
+        );
+      }
+    }
+
     // API 키 검증 (클라이언트에서 전달하거나 환경 변수 사용)
     if (!apiKey && !process.env.GEMINI_API_KEY) {
       return NextResponse.json(
@@ -29,12 +39,13 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Gemini API를 사용하여 텍스트를 마크다운으로 변환
-    const markdown = await convertTextToMarkdown(text, apiKey);
+    // Gemini API를 사용하여 텍스트를 MarkSlide 최적화 마크다운으로 변환
+    const result = await convertTextToMarkdown(text, apiKey, pageCount);
 
     return NextResponse.json({
       success: true,
-      markdown,
+      markdown: result.markdown,
+      metadata: result.metadata,
     });
   } catch (error) {
     console.error('텍스트→마크다운 변환 중 오류 발생:', error);

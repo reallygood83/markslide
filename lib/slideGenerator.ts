@@ -11,13 +11,95 @@ interface SlideMetadata {
 }
 
 /**
+ * YouTube URL에서 Video ID 추출
+ * 지원 형식:
+ * - https://www.youtube.com/watch?v=VIDEO_ID
+ * - https://youtu.be/VIDEO_ID
+ * - https://www.youtube.com/embed/VIDEO_ID
+ */
+function extractYouTubeVideoId(url: string): string | null {
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([a-zA-Z0-9_-]{11})/,
+    /youtube\.com\/watch\?.*v=([a-zA-Z0-9_-]{11})/
+  ];
+
+  for (const pattern of patterns) {
+    const match = url.match(pattern);
+    if (match && match[1]) {
+      return match[1];
+    }
+  }
+
+  return null;
+}
+
+/**
+ * 마크다운에서 YouTube URL을 iframe으로 자동 변환
+ * 변환 규칙:
+ * 1. 이미 iframe이 있는 경우 → 변환하지 않음 (사용자가 직접 작성한 iframe 존중)
+ * 2. 단독 줄에 있는 YouTube URL → iframe 임베딩 (height 400px)
+ * 3. 링크 형태 [제목](URL) → iframe + 제목
+ * 4. 일반 텍스트 안의 URL은 변환하지 않음
+ */
+function convertYouTubeLinksToIframe(markdown: string): string {
+  const lines = markdown.split('\n');
+  const result: string[] = [];
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i].trim();
+
+    // 0. 이미 iframe이 있는 줄은 그대로 유지 (사용자가 직접 작성한 경우)
+    if (line.includes('<iframe')) {
+      result.push(lines[i]);
+      continue;
+    }
+
+    // 1. 단독 YouTube URL (독립된 줄)
+    const standaloneUrlMatch = line.match(/^(https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}(?:\S*))$/);
+    if (standaloneUrlMatch) {
+      const videoId = extractYouTubeVideoId(standaloneUrlMatch[1]);
+      if (videoId) {
+        result.push(`<iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`);
+        result.push(''); // 빈 줄 추가로 간격 유지
+        continue;
+      }
+    }
+
+    // 2. 마크다운 링크 형태 [제목](YouTube URL)
+    const linkMatch = line.match(/\[([^\]]+)\]\((https?:\/\/(?:www\.)?(?:youtube\.com\/watch\?v=|youtu\.be\/)[a-zA-Z0-9_-]{11}(?:\S*))\)/);
+    if (linkMatch) {
+      const title = linkMatch[1];
+      const videoId = extractYouTubeVideoId(linkMatch[2]);
+      if (videoId) {
+        // 제목이 있으면 위에 표시
+        if (title && title.trim()) {
+          result.push(`**${title}**`);
+          result.push('');
+        }
+        result.push(`<iframe width="100%" height="400" src="https://www.youtube.com/embed/${videoId}" frameborder="0" allowfullscreen></iframe>`);
+        result.push(''); // 빈 줄 추가
+        continue;
+      }
+    }
+
+    // 3. 변환되지 않은 일반 줄은 그대로 유지
+    result.push(lines[i]);
+  }
+
+  return result.join('\n');
+}
+
+/**
  * 마크다운 텍스트를 슬라이드로 분할
  * 사용자가 선택한 페이지 수에 정확히 맞춤
  */
 export function splitMarkdownIntoSlides(markdown: string, targetSlides: number = 20): string[] {
+  // YouTube URL을 iframe으로 자동 변환 (전처리)
+  const processedMarkdown = convertYouTubeLinksToIframe(markdown);
+
   // 1단계: H1, H2, --- 기준으로 자연스럽게 분할
   const slideDelimiters = /(?=^#\s)|(?=^##\s)|(?=^---$)/gm;
-  let parts = markdown.split(slideDelimiters).filter(Boolean);
+  let parts = processedMarkdown.split(slideDelimiters).filter(Boolean);
 
   // 빈 슬라이드 제거
   parts = parts.filter(part => {
