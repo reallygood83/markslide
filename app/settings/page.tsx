@@ -7,9 +7,6 @@ import { Header } from '@/components/Header';
 export default function SettingsPage() {
   const [apiKey, setApiKey] = useState('');
   const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash-exp');
-  const [text, setText] = useState('');
-  const [markdown, setMarkdown] = useState('');
-  const [isConverting, setIsConverting] = useState(false);
   const [isTestingApi, setIsTestingApi] = useState(false);
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
 
@@ -77,68 +74,6 @@ export default function SettingsPage() {
     alert(`API 키와 모델(${selectedModel})이 저장되었습니다!`);
   };
 
-  // 텍스트를 마크다운으로 변환
-  const handleConvert = async () => {
-    if (!text.trim()) {
-      alert('변환할 텍스트를 입력해주세요.');
-      return;
-    }
-
-    const savedApiKey = localStorage.getItem('gemini_api_key');
-    if (!savedApiKey) {
-      alert('먼저 API 키를 저장해주세요.');
-      return;
-    }
-
-    setIsConverting(true);
-    setMarkdown('');
-
-    try {
-      const response = await fetch('/api/convert-to-markdown', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          text,
-          apiKey: savedApiKey  // API 키를 body에 포함
-        }),
-      });
-
-      if (!response.ok) {
-        const errorData = await response.json();
-        throw new Error(errorData.error || '변환에 실패했습니다.');
-      }
-
-      const data = await response.json();
-      setMarkdown(data.markdown);
-    } catch (error) {
-      console.error('변환 중 오류:', error);
-      alert(error instanceof Error ? error.message : '변환 중 오류가 발생했습니다.');
-    } finally {
-      setIsConverting(false);
-    }
-  };
-
-  // 마크다운 복사
-  const handleCopyMarkdown = () => {
-    navigator.clipboard.writeText(markdown);
-    alert('마크다운이 클립보드에 복사되었습니다!');
-  };
-
-  // 마크다운 다운로드
-  const handleDownloadMarkdown = () => {
-    const blob = new Blob([markdown], { type: 'text/markdown' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = 'converted-slides.md';
-    document.body.appendChild(a);
-    a.click();
-    URL.revokeObjectURL(url);
-    document.body.removeChild(a);
-  };
-
   return (
     <div className="min-h-screen bg-white">
       <Header />
@@ -152,7 +87,7 @@ export default function SettingsPage() {
               설정
             </h1>
             <p style={{ fontFamily: 'Inter, sans-serif', color: '#666' }}>
-              Gemini API 설정 및 텍스트→마크다운 변환
+              Gemini API 키 및 모델 설정
             </p>
           </div>
 
@@ -271,69 +206,6 @@ export default function SettingsPage() {
                   <li>생성된 API 키를 복사하여 위 입력란에 붙여넣으세요</li>
                 </ol>
               </div>
-            </div>
-          </div>
-
-          {/* 텍스트→마크다운 변환 섹션 */}
-          <div className="chanel-card">
-            <h2 className="text-2xl font-bold mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>
-              텍스트 → 마크다운 변환
-            </h2>
-
-            <div className="space-y-4">
-              <div>
-                <label htmlFor="text" className="chanel-label">
-                  일반 텍스트 입력
-                </label>
-                <textarea
-                  id="text"
-                  value={text}
-                  onChange={(e) => setText(e.target.value)}
-                  placeholder="슬라이드로 만들고 싶은 내용을 입력하세요..."
-                  rows={10}
-                  className="chanel-input"
-                  style={{ resize: 'vertical', fontFamily: 'Inter, monospace' }}
-                />
-              </div>
-
-              <button
-                onClick={handleConvert}
-                disabled={isConverting}
-                className="chanel-button w-full"
-              >
-                {isConverting ? '변환 중...' : '🎯 마크다운으로 변환'}
-              </button>
-
-              {markdown && (
-                <div>
-                  <div className="flex justify-between items-center mb-2">
-                    <label className="chanel-label">변환된 마크다운</label>
-                    <div className="flex gap-2">
-                      <button
-                        onClick={handleCopyMarkdown}
-                        className="chanel-button-secondary"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                      >
-                        📋 복사
-                      </button>
-                      <button
-                        onClick={handleDownloadMarkdown}
-                        className="chanel-button-secondary"
-                        style={{ padding: '0.5rem 1rem', fontSize: '0.875rem' }}
-                      >
-                        💾 다운로드
-                      </button>
-                    </div>
-                  </div>
-                  <textarea
-                    value={markdown}
-                    readOnly
-                    rows={15}
-                    className="chanel-input"
-                    style={{ resize: 'vertical', fontFamily: 'Fira Code, monospace', backgroundColor: '#f5f5f5' }}
-                  />
-                </div>
-              )}
             </div>
           </div>
 
