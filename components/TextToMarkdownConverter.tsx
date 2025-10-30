@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Wand2, Copy, Download, FileText, Code, Youtube } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
@@ -23,14 +23,14 @@ export function TextToMarkdownConverter() {
   const [apiKey, setApiKey] = useState('');
 
   // API 키 로드 (클라이언트 사이드에서만)
-  useState(() => {
+  useEffect(() => {
     if (typeof window !== 'undefined') {
       const savedKey = localStorage.getItem('gemini-api-key');
       if (savedKey) {
         setApiKey(savedKey);
       }
     }
-  });
+  }, []);
 
   const handleConvert = async () => {
     if (!inputText.trim()) {
