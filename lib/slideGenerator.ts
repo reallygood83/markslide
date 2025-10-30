@@ -260,8 +260,15 @@ export async function generateSlideHtml(
 ): Promise<string> {
   const htmlContent = await markdownToHtml(slideContent);
 
+  // 마지막 슬라이드 감지 (감사합니다, 마무리 등)
+  const isClosingSlide = slideNumber === totalSlides &&
+    (slideContent.includes('감사합니다') ||
+     slideContent.includes('감사합니다') ||
+     slideContent.includes('Thank you') ||
+     slideContent.includes('질문이 있으신가요'));
+
   return `
-    <section class="slide" data-slide-number="${slideNumber}">
+    <section class="slide ${isClosingSlide ? 'slide-closing' : ''}" data-slide-number="${slideNumber}">
       <div class="slide-content">
         ${htmlContent}
       </div>
@@ -393,34 +400,34 @@ body {
 }
 
 .slide-content h1 {
-  font-size: 2.5rem;
-  margin-bottom: 1rem;
+  font-size: 3.2rem;
+  margin-bottom: 1.5rem;
   line-height: 1.2;
 }
 
 .slide-content h2 {
-  font-size: 2rem;
-  margin-bottom: 0.8rem;
+  font-size: 2.8rem;
+  margin-bottom: 1.2rem;
   line-height: 1.3;
 }
 
 .slide-content h3 {
-  font-size: 1.6rem;
-  margin-bottom: 0.6rem;
+  font-size: 2.2rem;
+  margin-bottom: 1rem;
   line-height: 1.4;
 }
 
 .slide-content p {
-  font-size: 1.3rem;
-  line-height: 1.6;
-  margin-bottom: 0.8rem;
+  font-size: 1.8rem;
+  line-height: 1.8;
+  margin-bottom: 1.2rem;
 }
 
 .slide-content ul, .slide-content ol {
-  font-size: 1.3rem;
-  line-height: 1.8;
-  margin-left: 2rem;
-  margin-bottom: 0.8rem;
+  font-size: 1.8rem;
+  line-height: 2;
+  margin-left: 2.5rem;
+  margin-bottom: 1.2rem;
 }
 
 .slide-content li {
@@ -488,6 +495,30 @@ body {
   opacity: 0.6;
 }
 
+/* 마지막 슬라이드 (감사합니다 등) - 표지처럼 중앙 정렬 */
+.slide-closing {
+  justify-content: center;
+  align-items: center;
+}
+
+.slide-closing .slide-content {
+  text-align: center;
+  justify-content: center;
+  align-items: center;
+}
+
+.slide-closing h1,
+.slide-closing h2 {
+  font-size: 4rem;
+  font-weight: 700;
+  margin-bottom: 2rem;
+}
+
+.slide-closing p {
+  font-size: 2rem;
+  opacity: 0.8;
+}
+
 /* 컨트롤 버튼 */
 .controls {
   position: fixed;
@@ -536,10 +567,14 @@ body {
     padding: 40px 60px;
   }
 
-  .slide-content h1 { font-size: 2rem; }
-  .slide-content h2 { font-size: 1.6rem; }
-  .slide-content h3 { font-size: 1.4rem; }
-  .slide-content p, .slide-content ul, .slide-content ol { font-size: 1.1rem; }
+  .slide-content h1 { font-size: 2.6rem; }
+  .slide-content h2 { font-size: 2.2rem; }
+  .slide-content h3 { font-size: 1.8rem; }
+  .slide-content p, .slide-content ul, .slide-content ol { font-size: 1.5rem; }
+
+  .slide-closing h1,
+  .slide-closing h2 { font-size: 3.2rem; }
+  .slide-closing p { font-size: 1.6rem; }
 }
 `;
 
