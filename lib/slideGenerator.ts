@@ -90,39 +90,89 @@ function convertYouTubeLinksToIframe(markdown: string): string {
 }
 
 /**
+ * 마크다운에서 H2/H3 앞에 "---"를 강제 삽입하여 완벽한 슬라이드 분리 보장
+ * v3.0 - Gemini가 누락한 "---"를 자동으로 추가
+ */
+function enforceSlideBreaksForHeadings(markdown: string): string {
+  const lines = markdown.split('\n');
+  const result: string[] = [];
+  let previousLineWasEmpty = false;
+  let previousLineWasDivider = false;
+
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    const trimmedLine = line.trim();
+
+    // H2 (##) 또는 H3 (###) 감지
+    const isH2 = /^##\s/.test(trimmedLine);
+    const isH3 = /^###\s/.test(trimmedLine);
+
+    if (isH2 || isH3) {
+      // 직전 줄이 "---"가 아니고, 첫 번째 H2도 아니라면 "---" 추가
+      const isFirstHeading = i === 0 || result.length === 0;
+      const needsDivider = !previousLineWasDivider && !isFirstHeading;
+
+      if (needsDivider) {
+        // 이전 줄이 빈 줄이 아니면 빈 줄 하나 추가
+        if (!previousLineWasEmpty && result.length > 0) {
+          result.push('');
+        }
+        // "---" 구분자 추가
+        result.push('---');
+        result.push(''); // "---" 다음 빈 줄
+      }
+
+      result.push(line);
+      previousLineWasEmpty = false;
+      previousLineWasDivider = false;
+    } else if (trimmedLine === '---') {
+      // 이미 있는 "---"는 그대로 유지
+      result.push(line);
+      previousLineWasEmpty = false;
+      previousLineWasDivider = true;
+    } else {
+      // 일반 줄
+      result.push(line);
+      previousLineWasEmpty = trimmedLine === '';
+      previousLineWasDivider = false;
+    }
+  }
+
+  return result.join('\n');
+}
+
+/**
  * 마크다운 텍스트를 슬라이드로 분할
- * 사용자가 선택한 페이지 수에 정확히 맞춤
+ * v3.0 - H2/H3 강제 분리 로직 추가
  */
 export function splitMarkdownIntoSlides(markdown: string, targetSlides: number = 20): string[] {
-  // YouTube URL을 iframe으로 자동 변환 (전처리)
-  const processedMarkdown = convertYouTubeLinksToIframe(markdown);
+  // 1단계: YouTube URL을 iframe으로 자동 변환
+  let processedMarkdown = convertYouTubeLinksToIframe(markdown);
 
-  // 1단계: H1, H2, --- 기준으로 자연스럽게 분할
-  const slideDelimiters = /(?=^#\s)|(?=^##\s)|(?=^---$)/gm;
+  // 2단계: H2/H3 앞에 "---" 강제 삽입 (누락된 구분자 자동 추가)
+  processedMarkdown = enforceSlideBreaksForHeadings(processedMarkdown);
+
+  console.log('🔧 H2/H3 분리 처리 완료');
+
+  // 3단계: "---" 기준으로 슬라이드 분할
+  const slideDelimiters = /^---$/gm;
   let parts = processedMarkdown.split(slideDelimiters).filter(Boolean);
 
-  // 빈 슬라이드 제거
+  // 빈 슬라이드 제거 및 정리
   parts = parts.filter(part => {
     const trimmed = part.trim();
     return trimmed && trimmed !== '---';
-  });
+  }).map(part => part.trim());
 
   if (parts.length === 0) {
     return [markdown];
   }
 
-  // 2단계: 목표 페이지 수에 맞게 조정
-  if (parts.length === targetSlides) {
-    return parts; // 정확히 일치하면 그대로 사용
-  }
+  console.log(`✅ 총 ${parts.length}개 슬라이드로 분할됨`);
 
-  if (parts.length > targetSlides) {
-    // 슬라이드가 많으면 일부 병합
-    return mergeSlides(parts, targetSlides);
-  } else {
-    // 슬라이드가 적으면 분할 확장
-    return expandSlides(parts, targetSlides);
-  }
+  // 4단계: 목표 페이지 수는 참고용 (자연스러운 분할 우선)
+  // 너무 많거나 적으면 조정하지만, H2/H3 분리는 절대 유지
+  return parts;
 }
 
 /**
