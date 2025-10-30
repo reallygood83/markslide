@@ -25,7 +25,7 @@ export function TextToMarkdownConverter() {
   // API 키 로드 (클라이언트 사이드에서만)
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      const savedKey = localStorage.getItem('gemini-api-key');
+      const savedKey = localStorage.getItem('gemini_api_key');
       if (savedKey) {
         setApiKey(savedKey);
       }
@@ -38,7 +38,10 @@ export function TextToMarkdownConverter() {
       return;
     }
 
-    if (!apiKey && !process.env.NEXT_PUBLIC_GEMINI_API_KEY) {
+    // localStorage에서 API 키 다시 확인
+    const currentApiKey = apiKey || (typeof window !== 'undefined' ? localStorage.getItem('gemini_api_key') : null);
+
+    if (!currentApiKey) {
       alert('API 키가 설정되지 않았습니다. 설정 페이지에서 API 키를 입력해주세요.');
       return;
     }
@@ -51,7 +54,7 @@ export function TextToMarkdownConverter() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           text: inputText,
-          apiKey: apiKey || undefined,
+          apiKey: currentApiKey,
           pageCount: pageCount,
         }),
       });
