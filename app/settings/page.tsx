@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Header } from '@/components/Header';
 
@@ -9,6 +9,22 @@ export default function SettingsPage() {
   const [selectedModel, setSelectedModel] = useState('gemini-2.0-flash-exp');
   const [isTestingApi, setIsTestingApi] = useState(false);
   const [apiTestResult, setApiTestResult] = useState<string | null>(null);
+
+  // 페이지 로드 시 localStorage에서 저장된 API 키와 모델 불러오기
+  useEffect(() => {
+    const savedApiKey = localStorage.getItem('gemini_api_key');
+    const savedModel = localStorage.getItem('gemini_model');
+
+    if (savedApiKey) {
+      setApiKey(savedApiKey);
+      console.log('✅ 저장된 API 키를 불러왔습니다:', savedApiKey.substring(0, 10) + '...');
+    }
+
+    if (savedModel) {
+      setSelectedModel(savedModel);
+      console.log('✅ 저장된 모델을 불러왔습니다:', savedModel);
+    }
+  }, []);
 
   // API 키 테스트
   const handleTestApi = async () => {
